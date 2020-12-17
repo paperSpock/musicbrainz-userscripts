@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           Import Bandcamp releases and art to MusicBrainz
 // @description    Add a button on Bandcamp's album pages to open MusicBrainz release editor with pre-filled data for the selected release
-// @version        2020.12.17.3
+// @version        2020.12.17.4
 // @namespace      https://github.com/paperSpock/musicbrainz-userscripts
 // @downloadURL    https://raw.github.com/paperSpock/musicbrainz-userscripts/master/bandcamp_importer.user.js
 // @updateURL      https://raw.github.com/paperSpock/musicbrainz-userscripts/master/bandcamp_importer.user.js
@@ -359,7 +359,7 @@ $(document).ready(function () {
         mblinks.searchAndDisplayMbLink(release.url, 'release', function (link) {
             $('div#name-section h3 span:first').after(link);
             var cover_art_link = link.substring(9, 71) + "/add-cover-art";
-            $('div#mb_buttons').append(MBImport.BuildArtFormHTML(link, fullsizeimageurl, release.url))
+            $('div#mb_buttons').append(MBImport.BuildArtFormHTML(link, fullsizeimageurl, release.url));
             
             var button = document.querySelector('musicbrainz_art_add');
             button.addEventListener('click', function download_url(){var result=GM_download({url: fullsizeimageurl, name: "MusicBrainz/" + filename});}, true);
