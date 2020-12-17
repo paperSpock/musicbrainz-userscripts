@@ -360,11 +360,8 @@ $(document).ready(function () {
             $('div#name-section h3 span:first').after(link);
             var cover_art_link = link.substring(9, 71) + "/add-cover-art";
             $('div#mb_buttons').append(MBImport.BuildArtFormHTML(link, fullsizeimageurl, release.url))
-/*                `<form class='musicbrainz_art' action=${cover_art_link} method="post" target="_blank" accept-charset="UTF-8" charset="UTF-8" style="display: inline-block;">
-                    <input type="hidden" value="front Cover added from ${release.url}\n ${fullsizeimageurl}" name="add-cover-art.edit_note">
-                    <button id="downloadArt">Add Art</button>
-                </form>`);*/
-            var button = document.getElementById('downloadArt');
+            
+            var button = document.querySelector('musicbrainz_art_add');
             button.addEventListener('click', function download_url(){var result=GM_download({url: fullsizeimageurl, name: "MusicBrainz/" + filename});}, true);
         });
     }
