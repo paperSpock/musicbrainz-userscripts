@@ -1,18 +1,21 @@
 // ==UserScript==
-// @name           Import Bandcamp releases to MusicBrainz
+// @name           Import Bandcamp releases and art to MusicBrainz
 // @description    Add a button on Bandcamp's album pages to open MusicBrainz release editor with pre-filled data for the selected release
-// @version        2020.10.6.1
-// @namespace      http://userscripts.org/users/22504
-// @downloadURL    https://raw.github.com/murdos/musicbrainz-userscripts/master/bandcamp_importer.user.js
-// @updateURL      https://raw.github.com/murdos/musicbrainz-userscripts/master/bandcamp_importer.user.js
+// @version        2020.12.17.2
+// @namespace      https://github.com/paperSpock/musicbrainz-userscripts
+// @downloadURL    https://raw.github.com/paperSpock/musicbrainz-userscripts/master/bandcamp_importer.user.js
+// @updateURL      https://raw.github.com/paperSpock/musicbrainz-userscripts/master/bandcamp_importer.user.js
 // @include        /^https?://[^/]+/(?:album|track)/[^/]+$/
 // @require        https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js
 // @require        lib/mbimport.js
 // @require        lib/logger.js
 // @require        lib/mblinks.js
 // @require        lib/mbimportstyle.js
-// @icon           https://raw.githubusercontent.com/murdos/musicbrainz-userscripts/master/assets/images/Musicbrainz_import_logo.png
+// @connect        f4.bcbits.com
+// @icon           https://raw.githubusercontent.com/paperSpock/musicbrainz-userscripts/master/assets/images/Musicbrainz_import_logo.png
 // @grant          unsafeWindow
+// @grant          GM_download
+// @grant          GM_setClipboard
 // ==/UserScript==
 
 // prevent JQuery conflicts, see http://wiki.greasespot.net/@grant
@@ -272,6 +275,14 @@ $(document).ready(function () {
     let root_url = release.url.match(/^(https?:\/\/[^\/]+)/)[1].split('?')[0];
     let label_url = '';
 
+    // Get cover art link
+    let fullsizeimageurl = $('div#tralbumArt a').attr('href').replace('_10', '_0');
+
+    // Generate cover art filename for saving to disk
+    var filename = release.title + " - " + release.artist_credit[0].artist_name
+    filename = filename.replace(/[^a-z0-9\ -]/gi, '_').toLowerCase();
+    filename += ".jpg"
+
     mblinks.searchAndDisplayMbLink(
         root_url,
         'label',
@@ -347,6 +358,14 @@ $(document).ready(function () {
         // add MB release links to album or single
         mblinks.searchAndDisplayMbLink(release.url, 'release', function (link) {
             $('div#name-section h3 span:first').after(link);
+            var cover_art_link = link.substring(9, 71) + "/add-cover-art";
+            $('div#mb_buttons').append(MBImport.BuildArtFormHTML(link, fullsizeimageurl, release.url))
+/*                `<form class='musicbrainz_art' action=${cover_art_link} method="post" target="_blank" accept-charset="UTF-8" charset="UTF-8" style="display: inline-block;">
+                    <input type="hidden" value="front Cover added from ${release.url}\n ${fullsizeimageurl}" name="add-cover-art.edit_note">
+                    <button id="downloadArt">Add Art</button>
+                </form>`);*/
+            var button = document.getElementById('downloadArt');
+            button.addEventListener('click', function download_url(){var result=GM_download({url: fullsizeimageurl, name: "MusicBrainz/" + filename});}, true);
         });
     }
 
@@ -354,7 +373,6 @@ $(document).ready(function () {
     $('div.tralbum-tags a:not(:last-child).tag').after(', ');
 
     // append a link to the full size image
-    let fullsizeimageurl = $('div#tralbumArt a').attr('href').replace('_10', '_0');
     $('div#tralbumArt').after(
         `<div id='bci_link'><a class='custom-color' href='${fullsizeimageurl}' title='Open original image in a new tab (Bandcamp importer)' target='_blank'>Original image</a></div>`
     );
